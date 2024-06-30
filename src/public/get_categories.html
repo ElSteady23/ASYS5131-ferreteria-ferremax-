@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obtener Categorías</title>
+</head>
+<body>
+    <h1>Lista de Categorías</h1>
+    <button onclick="getCategories()">Obtener Categorías</button>
+    <ul id="categoryList"></ul>
+
+    <script>
+        function getCategories() {
+            fetch('http://localhost:3000/api/categories')
+                .then(response => response.json())
+                .then(data => {
+                    const categoryList = document.getElementById('categoryList');
+                    categoryList.innerHTML = '';
+                    data.forEach(category => {
+                        const li = document.createElement('li');
+                        li.textContent = `${category.id}: ${category.nombre_categoria}`;
+                        categoryList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

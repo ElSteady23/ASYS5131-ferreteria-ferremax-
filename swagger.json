@@ -1,0 +1,534 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API Ferretería Mejorada",
+    "version": "2.0.0",
+    "description": "API para la ferretería con funcionalidades de Transbank"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Servidor de desarrollo"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Productos",
+      "description": "Operaciones relacionadas con productos"
+    },
+    {
+      "name": "Categorías",
+      "description": "Operaciones relacionadas con categorías"
+    },
+    {
+      "name": "Transbank",
+      "description": "Operaciones relacionadas con pagos de Transbank"
+    }
+  ],
+  "paths": {
+    "/api/products": {
+      "get": {
+        "summary": "Obtener todos los productos",
+        "tags": ["Productos"],
+        "responses": {
+          "200": {
+            "description": "Lista de productos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear un nuevo producto",
+        "tags": ["Productos"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Producto creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/products/{id}": {
+      "get": {
+        "summary": "Obtener un producto por ID",
+        "tags": ["Productos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar un producto",
+        "tags": ["Productos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Producto actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Product"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar un producto",
+        "tags": ["Productos"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Producto eliminado"
+          },
+          "404": {
+            "description": "Producto no encontrado"
+          }
+        }
+      }
+    },
+    "/api/categories": {
+      "get": {
+        "summary": "Obtener todas las categorías",
+        "tags": ["Categorías"],
+        "responses": {
+          "200": {
+            "description": "Lista de categorías",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Crear una nueva categoría",
+        "tags": ["Categorías"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Categoría creada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/categories/{id}": {
+      "get": {
+        "summary": "Obtener una categoría por ID",
+        "tags": ["Categorías"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoría encontrada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoría no encontrada"
+          }
+        }
+      },
+      "put": {
+        "summary": "Actualizar una categoría",
+        "tags": ["Categorías"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CategoryInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Categoría actualizada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Categoría no encontrada"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Eliminar una categoría",
+        "tags": ["Categorías"],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Categoría eliminada"
+          },
+          "404": {
+            "description": "Categoría no encontrada"
+          }
+        }
+      }
+    },
+    "/transbank/create": {
+      "post": {
+        "summary": "Crear una transacción de Transbank",
+        "tags": ["Transbank"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransbankCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transacción creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransbankCreateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/transbank/commit": {
+      "post": {
+        "summary": "Confirmar una transacción de Transbank",
+        "tags": ["Transbank"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransbankCommitRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transacción confirmada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransbankCommitResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Product": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "sku": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "precio": {
+            "type": "integer"
+          },
+          "codigo_divisa": {
+            "type": "string"
+          },
+          "cantidad_disponible": {
+            "type": "integer"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "id_categoria": {
+            "type": "integer"
+          }
+        }
+      },
+      "ProductInput": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "integer"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "descripcion": {
+            "type": "string"
+          },
+          "precio": {
+            "type": "integer"
+          },
+          "codigo_divisa": {
+            "type": "string"
+          },
+          "cantidad_disponible": {
+            "type": "integer"
+          },
+          "marca": {
+            "type": "string"
+          },
+          "id_categoria": {
+            "type": "integer"
+          }
+        },
+        "required": ["sku", "nombre", "precio", "codigo_divisa", "cantidad_disponible", "marca", "id_categoria"]
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nombre_categoria": {
+            "type": "string"
+          }
+        }
+      },
+      "CategoryInput": {
+        "type": "object",
+        "properties": {
+          "nombre_categoria": {
+            "type": "string"
+          }
+        },
+        "required": ["nombre_categoria"]
+      },
+      "TransbankCreateRequest": {
+        "type": "object",
+        "properties": {
+          "buy_order": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "return_url": {
+            "type": "string"
+          }
+        },
+        "required": ["buy_order", "session_id", "amount", "return_url"]
+      },
+      "TransbankCreateResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "TransbankCommitRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": ["token"]
+      },
+      "TransbankCommitResponse": {
+        "type": "object",
+        "properties": {
+          "vci": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "status": {
+            "type": "string"
+          },
+          "buy_order": {
+            "type": "string"
+          },
+          "session_id": {
+            "type": "string"
+          },
+          "card_detail": {
+            "type": "object",
+            "properties": {
+              "card_number": {
+                "type": "string"
+              }
+            }
+          },
+          "accounting_date": {
+            "type": "string"
+          },
+          "transaction_date": {
+            "type": "string"
+          },
+          "authorization_code": {
+            "type": "string"
+          },
+          "payment_type_code": {
+            "type": "string"
+          },
+          "response_code": {
+            "type": "integer"
+          },
+          "installments_number": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  }
+}

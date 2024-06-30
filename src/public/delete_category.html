@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eliminar Categoría</title>
+</head>
+<body>
+    <h1>Eliminar Categoría</h1>
+    <form id="deleteForm">
+        <label for="categoryId">ID de la Categoría a Eliminar:</label>
+        <input type="number" id="categoryId" required><br><br>
+        <button type="submit">Eliminar Categoría</button>
+    </form>
+
+    <script>
+        document.getElementById('deleteForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const categoryId = document.getElementById('categoryId').value;
+
+            fetch(`http://localhost:3000/api/categories/${categoryId}`, {
+                method: 'DELETE',
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                this.reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

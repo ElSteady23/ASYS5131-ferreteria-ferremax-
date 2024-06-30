@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actualizar Producto</title>
+</head>
+<body>
+    <h1>Actualizar Producto</h1>
+    <form id="updateForm">
+        <label for="productId">ID del Producto:</label>
+        <input type="number" id="productId" required><br><br>
+        <label for="sku">Nuevo SKU:</label>
+        <input type="number" id="sku"><br><br>
+        <label for="nombre">Nuevo Nombre:</label>
+        <input type="text" id="nombre"><br><br>
+        <label for="descripcion">Nueva Descripción:</label>
+        <textarea id="descripcion"></textarea><br><br>
+        <label for="precio">Nuevo Precio:</label>
+        <input type="number" id="precio"><br><br>
+        <label for="codigo_divisa">Nuevo Código de Divisa:</label>
+        <input type="text" id="codigo_divisa"><br><br>
+        <label for="cantidad_disponible">Nueva Cantidad Disponible:</label>
+        <input type="number" id="cantidad_disponible"><br><br>
+        <label for="marca">Nueva Marca:</label>
+        <input type="text" id="marca"><br><br>
+        <label for="id_categoria">Nuevo ID de Categoría:</label>
+        <input type="number" id="id_categoria"><br><br>
+        <button type="submit">Actualizar Producto</button>
+    </form>
+
+    <script>
+        document.getElementById('updateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('productId').value;
+            const product = {};
+            
+            ['sku', 'nombre', 'descripcion', 'precio', 'codigo_divisa', 'cantidad_disponible', 'marca', 'id_categoria'].forEach(field => {
+                const value = document.getElementById(field).value;
+                if (value) {
+                    product[field] = ['sku', 'precio', 'cantidad_disponible', 'id_categoria'].includes(field) ? 
+                                     parseInt(value) : value;
+                }
+            });
+
+            fetch(`http://localhost:3000/api/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(product),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Producto actualizado con éxito: ' + data.nombre);
+                this.reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Obtener Productos</title>
+</head>
+<body>
+    <h1>Lista de Productos</h1>
+    <button onclick="getProducts()">Obtener Productos</button>
+    <ul id="productList"></ul>
+
+    <script>
+        function getProducts() {
+            fetch('http://localhost:3000/api/products')
+                .then(response => response.json())
+                .then(data => {
+                    const productList = document.getElementById('productList');
+                    productList.innerHTML = '';
+                    data.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = `${product.nombre} - SKU: ${product.sku} - Precio: $${product.precio} ${product.codigo_divisa}`;
+                        productList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Producto</title>
+</head>
+<body>
+    <h1>Crear Nuevo Producto</h1>
+    <form id="productForm">
+        <label for="sku">SKU:</label>
+        <input type="number" id="sku" required><br><br>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required><br><br>
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion"></textarea><br><br>
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" required><br><br>
+        <label for="codigo_divisa">Código de Divisa:</label>
+        <input type="text" id="codigo_divisa" required><br><br>
+        <label for="cantidad_disponible">Cantidad Disponible:</label>
+        <input type="number" id="cantidad_disponible" required><br><br>
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" required><br><br>
+        <label for="id_categoria">ID de Categoría:</label>
+        <input type="number" id="id_categoria" required><br><br>
+        <button type="submit">Crear Producto</button>
+    </form>
+
+    <script>
+        document.getElementById('productForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const product = {
+                sku: parseInt(document.getElementById('sku').value),
+                nombre: document.getElementById('nombre').value,
+                descripcion: document.getElementById('descripcion').value,
+                precio: parseInt(document.getElementById('precio').value),
+                codigo_divisa: document.getElementById('codigo_divisa').value,
+                cantidad_disponible: parseInt(document.getElementById('cantidad_disponible').value),
+                marca: document.getElementById('marca').value,
+                id_categoria: parseInt(document.getElementById('id_categoria').value)
+            };
+
+            fetch('http://localhost:3000/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(product),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Producto creado con éxito: ' + data.nombre);
+                this.reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>
