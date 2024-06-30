@@ -11,9 +11,6 @@ Esta es una API para una ferretería, desarrollada con Node.js y Express.
 
 1. Clona este repositorio:
 
-git clone https://github.com/AntaresAnton/api-ferreteria-mejorada.git cd api-ferreteria-mejorada
-
-
 2. Instala las dependencias:
 
 npm install
