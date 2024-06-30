@@ -1,8 +1,8 @@
-# API Ferretería Mejorada
+# API Ferretería Ferremax
 
 Esta es una API para una ferretería, desarrollada con Node.js y Express.
 
-## Requisitos previos
+## Requisitos previosw
 
 - Node.js (versión 12 o superior)
 - MySQL
