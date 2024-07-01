@@ -25,7 +25,8 @@ class CurrencyScraper {
 
   static async saveDollarValue(value, date) {
     try {
-      const query = 'INSERT INTO divisas (nombre, valor, fecha) VALUES (?, ?, ?)';
+      const query = 'UPDATE productos SET divisa_id = 1;';
+      
       await db.execute(query, ['dolar', value, date]);
     } catch (error) {
       console.error('Error al guardar en la base de datos:', error.message);
