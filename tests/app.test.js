@@ -1,28 +1,29 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire')
+const cors = require('cors')
+const app = require('../src/app')
 
-describe('App Configuration', () => {
-  let app
-  let processEnvStub
+describe('CORS Configuration', () => {
+  let useStub
 
   beforeEach(() => {
-    processEnvStub = sinon.stub(process, 'env').value({ FRONTEND_URL: 'http://example.com' })
-    app = proxyquire('../src/app', {})
+    useStub = sinon.stub(app, 'use')
   })
 
   afterEach(() => {
-    sinon.restore()
+    useStub.restore()
   })
 
-  it('should use FRONTEND_URL from environment variables if available', () => {
-    const origin = process.env.FRONTEND_URL || 'http://127.0.0.1:5500'
-    expect(origin).to.equal('http://example.com')
+  it('should configure CORS correctly', () => {
+    require('../src/app'); // Ensure the app is loaded and CORS is configured
+
+    expect(useStub.calledOnce).to.be.true
+    expect(useStub.firstCall.args[0]).to.equal(cors())
   })
 
-  it('should default to localhost URL if FRONTEND_URL is not set', () => {
-    processEnvStub.value({})
-    const origin = process.env.FRONTEND_URL || 'http://127.0.0.1:5500'
-    expect(origin).to.equal('http://127.0.0.1:5500')
+  it('should call app.use with CORS middleware', () => {
+    require('../src/app'); // Ensure the app is loaded and CORS is configured
+
+    expect(useStub.calledWith(cors())).to.be.true
   })
 })

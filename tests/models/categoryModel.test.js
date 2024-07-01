@@ -1,84 +1,78 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const Category = require('../../src/models/Category')
+const db = require('../../src/config/database')
+const logger = require('../../src/utils/logger')
+const Category = require('../../src/models/categoryModel')
 
-describe('Category Model', () => {
-  let createStub, findByIdStub, updateStub, deleteStub
+describe('Category Model - delete', () => {
+  let queryStub
+  let loggerInfoStub
+  let loggerWarnStub
+  let loggerErrorStub
 
   beforeEach(() => {
-    createStub = sinon.stub(Category, 'create')
-    findByIdStub = sinon.stub(Category, 'findById')
-    updateStub = sinon.stub(Category, 'update')
-    deleteStub = sinon.stub(Category, 'delete')
+    queryStub = sinon.stub(db, 'query')
+    loggerInfoStub = sinon.stub(logger, 'info')
+    loggerWarnStub = sinon.stub(logger, 'warn')
+    loggerErrorStub = sinon.stub(logger, 'error')
   })
 
   afterEach(() => {
-    sinon.restore()
+    queryStub.restore()
+    loggerInfoStub.restore()
+    loggerWarnStub.restore()
+    loggerErrorStub.restore()
   })
 
-  it('should create a new category', async () => {
-    const newCategory = { name: 'New Category' }
-    createStub.resolves(newCategory)
+  it('should delete a category and return the number of affected rows', async () => {
+    const id = 1
+    const result = { affectedRows: 1 }
+    queryStub.resolves([result])
 
-    const result = await Category.create(newCategory)
+    const affectedRows = await Category.delete(id)
 
-    expect(createStub.calledWith(newCategory)).to.be.true
-    expect(result).to.equal(newCategory)
+    expect(queryStub.calledOnceWith('DELETE FROM categoria WHERE id = ?', [id])).to.be.true
+    expect(loggerInfoStub.calledOnceWith(`Deleted category with ID: ${id}`)).to.be.true
+    expect(affectedRows).to.equal(1)
   })
 
-  it('should find a category by ID', async () => {
-    const category = { id: 1, name: 'Category 1' }
-    findByIdStub.resolves(category)
+  it('should return 0 if no category is found for deletion', async () => {
+    const id = 1
+    const result = { affectedRows: 0 }
+    queryStub.resolves([result])
 
-    const result = await Category.findById(1)
+    const affectedRows = await Category.delete(id)
 
-    expect(findByIdStub.calledWith(1)).to.be.true
-    expect(result).to.equal(category)
+    expect(queryStub.calledOnceWith('DELETE FROM categoria WHERE id = ?', [id])).to.be.true
+    expect(loggerWarnStub.calledOnceWith(`No category found with ID ${id} for deletion`)).to.be.true
+    expect(affectedRows).to.equal(0)
   })
 
-  it('should update a category', async () => {
-    const updatedCategory = { id: 1, name: 'Updated Category' }
-    updateStub.resolves(1)
+  it('should throw an error if the category ID is invalid', async () => {
+    const invalidId = 'invalid-id'
 
-    const result = await Category.update(1, { name: 'Updated Category' })
+    try {
+      await Category.delete(invalidId)
+    } catch (error) {
+      expect(error.message).to.equal('Invalid category ID')
+    }
 
-    expect(updateStub.calledWith(1, { name: 'Updated Category' })).to.be.true
-    expect(result).to.equal(1)
+    expect(queryStub.notCalled).to.be.true
+    expect(loggerErrorStub.notCalled).to.be.true
   })
 
-  it('should delete a category', async () => {
-    deleteStub.resolves(1)
+  it('should log and throw an error if the database query fails', async () => {
+    const id = 1
+    const error = new Error('Database error')
+    queryStub.rejects(error)
 
-    const result = await Category.delete(1)
+    try {
+      await Category.delete(id)
+    } catch (err) {
+      expect(err).to.equal(error)
+    }
 
-    expect(deleteStub.calledWith(1)).to.be.true
-    expect(result).to.equal(1)
-  })
-
-  it('should return null if category not found by ID', async () => {
-    findByIdStub.resolves(null)
-
-    const result = await Category.findById(999)
-
-    expect(findByIdStub.calledWith(999)).to.be.true
-    expect(result).to.be.null
-  })
-
-  it('should return 0 if category update fails', async () => {
-    updateStub.resolves(0)
-
-    const result = await Category.update(999, { name: 'Non-existent Category' })
-
-    expect(updateStub.calledWith(999, { name: 'Non-existent Category' })).to.be.true
-    expect(result).to.equal(0)
-  })
-
-  it('should return 0 if category deletion fails', async () => {
-    deleteStub.resolves(0)
-
-    const result = await Category.delete(999)
-
-    expect(deleteStub.calledWith(999)).to.be.true
-    expect(result).to.equal(0)
+    expect(queryStub.calledOnceWith('DELETE FROM categoria WHERE id = ?', [id])).to.be.true
+    expect(loggerErrorStub.calledOnceWith(`Error deleting category: ${error.message}`)).to.be.true
   })
 })

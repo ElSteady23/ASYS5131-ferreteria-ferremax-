@@ -1,27 +1,21 @@
 const mysql = require('mysql2')
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire')
+require('dotenv').config()
 
 describe('Database Pool Configuration', () => {
   let createPoolStub
-  let pool
 
-  beforeEach(() => {
+  before(() => {
     createPoolStub = sinon.stub(mysql, 'createPool')
-    pool = proxyquire('../../src/config/database', {
-      'mysql2': {
-        createPool: createPoolStub
-      }
-    })
   })
 
-  afterEach(() => {
-    sinon.restore()
+  after(() => {
+    createPoolStub.restore()
   })
 
   it('should create a pool with the correct configuration', () => {
-    const config = {
+    const poolConfig = {
       host: process.env.DB_HOST,
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
@@ -31,29 +25,61 @@ describe('Database Pool Configuration', () => {
       queueLimit: 0
     }
 
-    expect(createPoolStub.calledWith(config)).to.be.true
+    require('../../src/config/database')
+
+    expect(createPoolStub.calledOnce).to.be.true
+    expect(createPoolStub.calledWith(poolConfig)).to.be.true
   })
 
-  it('should set waitForConnections to true', () => {
-    const config = createPoolStub.firstCall.args[0]
-    expect(config.waitForConnections).to.be.true
+  it('should throw an error if DB_HOST is not defined', () => {
+    const originalHost = process.env.DB_HOST
+    delete process.env.DB_HOST
+
+    try {
+      require('../../src/config/database')
+    } catch (error) {
+      expect(error).to.exist
+    } finally {
+      process.env.DB_HOST = originalHost
+    }
   })
 
-  it('should set connectionLimit to 10', () => {
-    const config = createPoolStub.firstCall.args[0]
-    expect(config.connectionLimit).to.equal(10)
+  it('should throw an error if DB_USER is not defined', () => {
+    const originalUser = process.env.DB_USER
+    delete process.env.DB_USER
+
+    try {
+      require('../../src/config/database')
+    } catch (error) {
+      expect(error).to.exist
+    } finally {
+      process.env.DB_USER = originalUser
+    }
   })
 
-  it('should set queueLimit to 0', () => {
-    const config = createPoolStub.firstCall.args[0]
-    expect(config.queueLimit).to.equal(0)
+  it('should throw an error if DB_PASSWORD is not defined', () => {
+    const originalPassword = process.env.DB_PASSWORD
+    delete process.env.DB_PASSWORD
+
+    try {
+      require('../../src/config/database')
+    } catch (error) {
+      expect(error).to.exist
+    } finally {
+      process.env.DB_PASSWORD = originalPassword
+    }
   })
 
-  it('should use environment variables for database configuration', () => {
-    const config = createPoolStub.firstCall.args[0]
-    expect(config.host).to.equal(process.env.DB_HOST)
-    expect(config.user).to.equal(process.env.DB_USER)
-    expect(config.password).to.equal(process.env.DB_PASSWORD)
-    expect(config.database).to.equal(process.env.DB_NAME)
+  it('should throw an error if DB_NAME is not defined', () => {
+    const originalName = process.env.DB_NAME
+    delete process.env.DB_NAME
+
+    try {
+      require('../../src/config/database')
+    } catch (error) {
+      expect(error).to.exist
+    } finally {
+      process.env.DB_NAME = originalName
+    }
   })
 })

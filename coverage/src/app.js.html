@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.88% </span>
+                <span class="strong">86.2% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>24/27</span>
+                <span class='fraction'>25/29</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">50% </span>
+                <span class="strong">75% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>1/2</span>
+                <span class='fraction'>3/4</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">88.88% </span>
+                <span class="strong">86.2% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>24/27</span>
+                <span class='fraction'>25/29</span>
             </div>
         
             
@@ -114,36 +114,38 @@
 <a name='L49'></a><a href='#L49'>49</a>
 <a name='L50'></a><a href='#L50'>50</a>
 <a name='L51'></a><a href='#L51'>51</a>
-<a name='L52'></a><a href='#L52'>52</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L52'></a><a href='#L52'>52</a>
+<a name='L53'></a><a href='#L53'>53</a>
+<a name='L54'></a><a href='#L54'>54</a>
+<a name='L55'></a><a href='#L55'>55</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -157,6 +159,10 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -172,29 +178,28 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('../swagger.json');
 const productRoutes = require('./routes/productRoutes');
 const categoryRoutes = require('./routes/categoryRoutes');
-const transbankRoutes = require('./routes/transbankRoutes.js'); // Añade esta línea
+const transbankRoutes = require('./routes/transbankRoutes.js');
 const Product = require('./models/productModel');
+const configureMiddleware = require('./middleware/configureMiddleware');
 &nbsp;
 require('dotenv').config();
 &nbsp;
 const app = express();
 &nbsp;
 // Configuración de CORS
-// const corsOptions = {
-//   origin: process.env.FRONTEND_URL || 'http://127.0.0.1:5500', // Asume que tu frontend está en el puerto 5500
-//   optionsSuccessStatus: 200
-// }
+const corsOptions = {
+  origin: process.env.FRONTEND_URL || process.env.DEFAULT_FRONTEND_URL,
+  optionsSuccessStatus: 200
+}
 &nbsp;
-app.use(cors());
-// app.use(cors(corsOptions));
-app.use(morgan('dev'));
-app.use(express.json());
+// Configurar middleware
+configureMiddleware(app, corsOptions);
 &nbsp;
+// Rutas de la API
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/api/products', productRoutes);
-app.use('/api/categories', categoryRoutes);
-app.use('/transbank', transbankRoutes);
-&nbsp;
+app.use('/api/v1/products', productRoutes);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/transbank', transbankRoutes);
 &nbsp;
 // Función para actualizar el valor del dólar
 async function updateDollarValue() {
@@ -207,7 +212,11 @@ async function updateDollarValue() {
 }
 &nbsp;
 // Actualizar el valor del dólar al iniciar la API
-updateDollarValue();
+try {
+  updateDollarValue();
+} catch (error) {
+<span class="cstat-no" title="statement not covered" >  console.error('Error al actualizar el valor del dólar:', error);</span>
+}
 &nbsp;
 // Programar la actualización periódica (por ejemplo, cada 24 horas)
 setInterval(updateDollarValue, 24 * 60 * 60 * 1000);
@@ -223,7 +232,7 @@ app.listen(PORT, <span class="fstat-no" title="function not covered" >()</span> 
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2024-06-30T23:32:13.164Z
+                at 2024-07-01T00:34:17.179Z
             </div>
         <script src="../prettify.js"></script>
         <script>

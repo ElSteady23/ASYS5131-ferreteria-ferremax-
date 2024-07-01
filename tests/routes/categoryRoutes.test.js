@@ -1,72 +1,89 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const proxyquire = require('proxyquire')
+const categoryController = require('../../src/controllers/categoryController')
+const Category = require('../../src/models/Category')
+const { createErrorResponse } = require('../../src/utils/errorResponse')
+const { logError } = require('../../src/utils/logger')
 
-describe('Category Routes - getCategoryById', () => {
-  let getCategoryById
-  let req
-  let res
-  let next
-  let getCategoryByIdStub
-
-  beforeEach(() => {
-    getCategoryByIdStub = sinon.stub()
-    getCategoryById = proxyquire('../../src/controllers/categoryController', {
-      './categoryController': {
-        getCategoryById: getCategoryByIdStub
+describe('Category Routes', () => {
+  describe('getCategoryById', () => {
+    it('should return 404 if category is not found', async () => {
+      const req = { params: { id: 'nonexistent-id' } }
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
       }
-    }).getCategoryById
 
-    req = {
-      params: { id: '1' }
-    }
+      sinon.stub(Category, 'getById').resolves(null)
 
-    res = {
-      json: sinon.spy(),
-      status: sinon.stub().returnsThis()
-    }
+      await categoryController.getCategoryById(req, res)
 
-    next = sinon.spy()
+      expect(res.status.calledWith(404)).to.be.true
+      expect(res.json.calledWith(createErrorResponse('Categoría no encontrada', 404))).to.be.true
+
+      Category.getById.restore()
+    })
+
+    it('should return 500 if there is an error retrieving the category', async () => {
+      const req = { params: { id: 'some-id' } }
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      }
+
+      const error = new Error('Database error')
+      sinon.stub(Category, 'getById').rejects(error)
+      sinon.stub(logError)
+
+      await categoryController.getCategoryById(req, res)
+
+      expect(logError.calledWith('Error al obtener la categoría', error)).to.be.true
+      expect(res.status.calledWith(500)).to.be.true
+      expect(res.json.calledWith(createErrorResponse('Error al obtener la categoría'))).to.be.true
+
+      Category.getById.restore()
+      logError.restore()
+    })
   })
 
-  afterEach(() => {
-    sinon.restore()
-  })
+  describe('createCategory', () => {
+    it('should return 201 and the created category', async () => {
+      const req = { body: { name: 'New Category' } }
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      }
 
-  it('should return category data with status 200 when category is found', async () => {
-    const categoryData = { id: 1, name: 'Category 1' }
-    getCategoryByIdStub.resolves(categoryData)
+      const createdCategory = { id: 'new-id', name: 'New Category' }
+      sinon.stub(Category, 'create').resolves(createdCategory)
 
-    await getCategoryById(req, res, next)
+      await categoryController.createCategory(req, res)
 
-    expect(res.status.calledWith(200)).to.be.true
-    expect(res.json.calledWith(categoryData)).to.be.true
-  })
+      expect(res.status.calledWith(201)).to.be.true
+      expect(res.json.calledWith(createdCategory)).to.be.true
 
-  it('should return 404 when category is not found', async () => {
-    getCategoryByIdStub.resolves(null)
+      Category.create.restore()
+    })
 
-    await getCategoryById(req, res, next)
+    it('should return 500 if there is an error creating the category', async () => {
+      const req = { body: { name: 'New Category' } }
+      const res = {
+        status: sinon.stub().returnsThis(),
+        json: sinon.stub(),
+      }
 
-    expect(res.status.calledWith(404)).to.be.true
-    expect(res.json.calledWith({ error: 'Category not found' })).to.be.true
-  })
+      const error = new Error('Database error')
+      sinon.stub(Category, 'create').rejects(error)
+      sinon.stub(logError)
 
-  it('should return 500 when there is an error', async () => {
-    getCategoryByIdStub.rejects(new Error('Internal Server Error'))
+      await categoryController.createCategory(req, res)
 
-    await getCategoryById(req, res, next)
+      expect(logError.calledWith('Error al crear la categoría', error)).to.be.true
+      expect(res.status.calledWith(500)).to.be.true
+      expect(res.json.calledWith(createErrorResponse('Error al crear la categoría'))).to.be.true
 
-    expect(res.status.calledWith(500)).to.be.true
-    expect(res.json.calledWith({ error: 'Internal Server Error' })).to.be.true
-  })
-
-  it('should call next with error when there is an exception', async () => {
-    const error = new Error('Exception')
-    getCategoryByIdStub.throws(error)
-
-    await getCategoryById(req, res, next)
-
-    expect(next.calledWith(error)).to.be.true
+      Category.create.restore()
+      logError.restore()
+    })
   })
 })

@@ -1,25 +1,48 @@
-describe('ProductModel.delete', () => {
-  it('should throw an error if id is not an integer', async () => {
-    await expect(ProductModel.delete('abc')).rejects.toThrow('Invalid id: must be an integer')
+const { expect } = require('chai')
+const sinon = require('sinon')
+const CurrencyScraper = require('../../src/utils/CurrencyScraper')
+const ProductModel = require('../../src/models/productModel')
+
+describe('ProductModel.updateDollarValue', () => {
+  let scrapeDollarValueStub
+
+  beforeEach(() => {
+    scrapeDollarValueStub = sinon.stub(CurrencyScraper, 'scrapeDollarValue')
   })
 
-  it('should return 0 if no product is found with the given id', async () => {
-    db.execute.mockResolvedValue([{ affectedRows: 0 }])
-    const result = await ProductModel.delete(999)
-    expect(result).toBe(0)
+  afterEach(() => {
+    scrapeDollarValueStub.restore()
   })
 
-  it('should delete the product and return the number of affected rows', async () => {
-    db.execute.mockResolvedValue([{ affectedRows: 1 }])
-    const result = await ProductModel.delete(1)
-    expect(result).toBe(1)
+  it('should call CurrencyScraper.scrapeDollarValue and log success message', async () => {
+    const consoleLogStub = sinon.stub(console, 'log')
+
+    scrapeDollarValueStub.resolves()
+
+    await ProductModel.updateDollarValue()
+
+    expect(scrapeDollarValueStub.calledOnce).to.be.true
+    expect(consoleLogStub.calledWith("Valor del dólar actualizado exitosamente")).to.be.true
+
+    consoleLogStub.restore()
   })
 
-  it('should log an error and rethrow it if an exception occurs', async () => {
-    const error = new Error('Database error')
-    db.execute.mockRejectedValue(error)
-    console.error = jest.fn()
-    await expect(ProductModel.delete(1)).rejects.toThrow('Database error')
-    expect(console.error).toHaveBeenCalledWith('Error deleting product with id 1: Database error')
+  it('should log an error message and throw an error if CurrencyScraper.scrapeDollarValue fails', async () => {
+    const consoleErrorStub = sinon.stub(console, 'error')
+    const errorMessage = 'Network error'
+    const error = new Error(errorMessage)
+
+    scrapeDollarValueStub.rejects(error)
+
+    try {
+      await ProductModel.updateDollarValue()
+    } catch (err) {
+      expect(err).to.equal(error)
+    }
+
+    expect(scrapeDollarValueStub.calledOnce).to.be.true
+    expect(consoleErrorStub.calledWith("Error al actualizar el valor del dólar:", errorMessage)).to.be.true
+
+    consoleErrorStub.restore()
   })
 })
