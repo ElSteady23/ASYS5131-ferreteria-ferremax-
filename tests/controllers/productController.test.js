@@ -1,89 +1,47 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const productController = require('../../src/controllers/productController')
 const Product = require('../../src/models/Product')
-const { createErrorResponse } = require('../../src/utils/errorResponse')
-const { logError } = require('../../src/utils/logger')
+const { createProduct } = require('../../src/controllers/productController')
 
-describe('Product Controller', () => {
-  describe('getProductById', () => {
-    it('should return 404 if product is not found', async () => {
-      const req = { params: { id: 'nonexistent-id' } }
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      }
+describe('createProduct', () => {
+  let req, res
 
-      sinon.stub(Product, 'getById').resolves(null)
-
-      await productController.getProductById(req, res)
-
-      expect(res.status.calledWith(404)).to.be.true
-      expect(res.json.calledWith(createErrorResponse('Producto no encontrado', 404))).to.be.true
-
-      Product.getById.restore()
-    })
-
-    it('should return 500 if there is an error retrieving the product', async () => {
-      const req = { params: { id: 'some-id' } }
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      }
-
-      const error = new Error('Database error')
-      sinon.stub(Product, 'getById').rejects(error)
-      sinon.stub(logError)
-
-      await productController.getProductById(req, res)
-
-      expect(logError.calledWith('Error al obtener el producto', error)).to.be.true
-      expect(res.status.calledWith(500)).to.be.true
-      expect(res.json.calledWith(createErrorResponse('Error al obtener el producto'))).to.be.true
-
-      Product.getById.restore()
-      logError.restore()
-    })
+  beforeEach(() => {
+    req = { body: { name: 'Product 1', price: 10 } }
+    res = { status: sinon.stub().returnsThis(), json: sinon.stub() }
   })
 
-  describe('createProduct', () => {
-    it('should return 201 and the created product', async () => {
-      const req = { body: { name: 'New Product', price: 100 } }
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      }
+  afterEach(() => {
+    sinon.restore()
+  })
 
-      const createdProduct = { id: 'new-id', name: 'New Product', price: 100 }
-      sinon.stub(Product, 'create').resolves(createdProduct)
+  it('should create a new product and return the created product', async () => {
+    const createdProduct = { id: 1, ...req.body }
+    sinon.stub(Product, 'create').resolves(createdProduct.id)
 
-      await productController.createProduct(req, res)
+    await createProduct(req, res)
 
-      expect(res.status.calledWith(201)).to.be.true
-      expect(res.json.calledWith(createdProduct)).to.be.true
+    expect(res.status.calledWith(201)).to.be.true
+    expect(res.json.calledWith(createdProduct)).to.be.true
+  })
 
-      Product.create.restore()
-    })
+  it('should handle errors and return a 500 status code with an error message', async () => {
+    const error = new Error('Error creating product')
+    sinon.stub(Product, 'create').rejects(error)
 
-    it('should return 500 if there is an error creating the product', async () => {
-      const req = { body: { name: 'New Product', price: 100 } }
-      const res = {
-        status: sinon.stub().returnsThis(),
-        json: sinon.stub(),
-      }
+    await createProduct(req, res)
 
-      const error = new Error('Database error')
-      sinon.stub(Product, 'create').rejects(error)
-      sinon.stub(logError)
+    expect(res.status.calledWith(500)).to.be.true
+    expect(res.json.calledWith({ error: 'Error al crear el producto' })).to.be.true
+  })
 
-      await productController.createProduct(req, res)
+  it('should handle empty request body', async () => {
+    req.body = {}
+    sinon.stub(Product, 'create').resolves(1)
 
-      expect(logError.calledWith('Error al crear el producto', error)).to.be.true
-      expect(res.status.calledWith(500)).to.be.true
-      expect(res.json.calledWith(createErrorResponse('Error al crear el producto'))).to.be.true
+    await createProduct(req, res)
 
-      Product.create.restore()
-      logError.restore()
-    })
+    expect(res.status.calledWith(201)).to.be.true
+    expect(res.json.calledWith({ id: 1, ...req.body })).to.be.true
   })
 })

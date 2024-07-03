@@ -1,34 +1,52 @@
-describe('getCategoryById', () => {
-  it('should return 404 if category is not found', async () => {
-    const req = { params: { id: 'nonexistent-id' } }
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    }
+const { expect } = require('chai')
+const sinon = require('sinon')
+const categoryController = require('../../src/controllers/categoryController')
+const Category = require('../../src/models/Category')
 
-    Category.getById = jest.fn().mockResolvedValue(null)
+describe('categoryController', () => {
+  describe('getCategoryById', () => {
+    let req, res, getByIdStub
 
-    await categoryController.getCategoryById(req, res)
+    beforeEach(() => {
+      req = { params: { id: 1 } }
+      res = {
+        json: sinon.spy(),
+        status: sinon.stub().returns({ json: sinon.spy() }),
+      }
+      getByIdStub = sinon.stub(Category, 'getById')
+    })
 
-    expect(res.status).toHaveBeenCalledWith(404)
-    expect(res.json).toHaveBeenCalledWith(createErrorResponse('Categoría no encontrada', 404))
-  })
+    afterEach(() => {
+      sinon.restore()
+    })
 
-  it('should return 500 if there is an error retrieving the category', async () => {
-    const req = { params: { id: 'some-id' } }
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    }
+    it('should return the category when found', async () => {
+      const category = { id: 1, name: 'Category 1' }
+      getByIdStub.resolves(category)
 
-    const error = new Error('Database error')
-    Category.getById = jest.fn().mockRejectedValue(error)
-    logError = jest.fn()
+      await categoryController.getCategoryById(req, res)
 
-    await categoryController.getCategoryById(req, res)
+      expect(res.json.calledOnce).to.be.true
+      expect(res.json.calledWith({ success: true, data: category })).to.be.true
+    })
 
-    expect(logError).toHaveBeenCalledWith('Error al obtener la categoría', error)
-    expect(res.status).toHaveBeenCalledWith(500)
-    expect(res.json).toHaveBeenCalledWith(createErrorResponse('Error al obtener la categoría'))
+    it('should return 404 when category is not found', async () => {
+      getByIdStub.resolves(null)
+
+      await categoryController.getCategoryById(req, res)
+
+      expect(res.status.calledOnceWith(404)).to.be.true
+      expect(res.status().json.calledOnceWith({ success: false, message: 'Categoría no encontrada', code: 404 })).to.be.true
+    })
+
+    it('should return 500 when an error occurs', async () => {
+      const error = new Error('Database error')
+      getByIdStub.rejects(error)
+
+      await categoryController.getCategoryById(req, res)
+
+      expect(res.status.calledOnceWith(500)).to.be.true
+      expect(res.status().json.calledOnceWith({ success: false, message: 'Error al obtener la categoría', error })).to.be.true
+    })
   })
 })

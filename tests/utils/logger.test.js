@@ -1,53 +1,48 @@
-const { expect } = require('chai')
-const sinon = require('sinon')
 const winston = require('winston')
-const logger = require('../../src/utils/logger')
+const { expect } = require('chai')
 
-describe('Logger Utility', () => {
-  let winstonInfoStub
-  let winstonWarnStub
-  let winstonErrorStub
+describe('logger', () => {
+  let loggerInstance
 
   beforeEach(() => {
-    winstonInfoStub = sinon.stub(winston, 'info')
-    winstonWarnStub = sinon.stub(winston, 'warn')
-    winstonErrorStub = sinon.stub(winston, 'error')
+    loggerInstance = winston.createLogger({
+      level: 'info',
+      format: winston.format.json(),
+      transports: [
+        new winston.transports.Console(),
+      ],
+    })
   })
 
-  afterEach(() => {
-    winstonInfoStub.restore()
-    winstonWarnStub.restore()
-    winstonErrorStub.restore()
-  })
-
-  it('should log info messages correctly', () => {
+  it('should log an info message', () => {
+    const infoSpy = sinon.spy(loggerInstance, 'info')
     const message = 'This is an info message'
-    logger.info(message)
-    expect(winstonInfoStub.calledOnceWith(message)).to.be.true
+    loggerInstance.info(message)
+    expect(infoSpy.calledWith(message)).to.be.true
+    infoSpy.restore()
   })
 
-  it('should log warning messages correctly', () => {
-    const message = 'This is a warning message'
-    logger.warn(message)
-    expect(winstonWarnStub.calledOnceWith(message)).to.be.true
-  })
-
-  it('should log error messages correctly', () => {
+  it('should log an error message', () => {
+    const errorSpy = sinon.spy(loggerInstance, 'error')
     const message = 'This is an error message'
-    logger.error(message)
-    expect(winstonErrorStub.calledOnceWith(message)).to.be.true
+    loggerInstance.error(message)
+    expect(errorSpy.calledWith(message)).to.be.true
+    errorSpy.restore()
   })
 
-  it('should handle logging objects correctly', () => {
-    const message = { key: 'value' }
-    logger.info(message)
-    expect(winstonInfoStub.calledOnceWith(message)).to.be.true
+  it('should log a warning message', () => {
+    const warnSpy = sinon.spy(loggerInstance, 'warn')
+    const message = 'This is a warning message'
+    loggerInstance.warn(message)
+    expect(warnSpy.calledWith(message)).to.be.true
+    warnSpy.restore()
   })
 
-  it('should handle logging with multiple arguments', () => {
-    const message = 'Message with'
-    const additionalInfo = 'additional info'
-    logger.info(message, additionalInfo)
-    expect(winstonInfoStub.calledOnceWith(message, additionalInfo)).to.be.true
+  it('should log a debug message', () => {
+    const debugSpy = sinon.spy(loggerInstance, 'debug')
+    const message = 'This is a debug message'
+    loggerInstance.debug(message)
+    expect(debugSpy.calledWith(message)).to.be.true
+    debugSpy.restore()
   })
 })

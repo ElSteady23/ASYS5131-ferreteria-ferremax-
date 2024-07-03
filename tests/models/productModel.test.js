@@ -1,48 +1,60 @@
 const { expect } = require('chai')
 const sinon = require('sinon')
-const CurrencyScraper = require('../../src/utils/CurrencyScraper')
-const ProductModel = require('../../src/models/productModel')
+const db = require('../../src/db')
+const Product = require('../../src/models/productModel')
 
-describe('ProductModel.updateDollarValue', () => {
-  let scrapeDollarValueStub
+describe('Product Model', () => {
+  describe('getAll', () => {
+    afterEach(() => {
+      sinon.restore()
+    })
 
-  beforeEach(() => {
-    scrapeDollarValueStub = sinon.stub(CurrencyScraper, 'scrapeDollarValue')
-  })
+    it('should return all products', async () => {
+      const products = [
+        { id: 1, name: 'Product 1', description: 'Description 1', divisa_id: 1, price: 10.99, precio_en_dolares: 10.99, divisa_valor: 1.00, stock: 10 },
+        { id: 2, name: 'Product 2', description: 'Description 2', divisa_id: 2, price: 20.99, precio_en_dolares: 10.495, divisa_valor: 2.00, stock: 5 },
+      ]
+      sinon.stub(db, 'execute').resolves([products])
 
-  afterEach(() => {
-    scrapeDollarValueStub.restore()
-  })
+      const result = await Product.getAll()
 
-  it('should call CurrencyScraper.scrapeDollarValue and log success message', async () => {
-    const consoleLogStub = sinon.stub(console, 'log')
+      expect(result).to.deep.equal(products)
+    })
 
-    scrapeDollarValueStub.resolves()
+    it('should limit the number of products returned', async () => {
+      const products = [
+        { id: 1, name: 'Product 1', description: 'Description 1', divisa_id: 1, price: 10.99, precio_en_dolares: 10.99, divisa_valor: 1.00, stock: 10 },
+      ]
+      sinon.stub(db, 'execute').resolves([products])
 
-    await ProductModel.updateDollarValue()
+      const result = await Product.getAll(1, 0)
 
-    expect(scrapeDollarValueStub.calledOnce).to.be.true
-    expect(consoleLogStub.calledWith("Valor del dólar actualizado exitosamente")).to.be.true
+      expect(result).to.deep.equal(products)
+      expect(db.execute.calledWith(sinon.match.string, [1, 0])).to.be.true
+    })
 
-    consoleLogStub.restore()
-  })
+    it('should handle offset for pagination', async () => {
+      const products = [
+        { id: 3, name: 'Product 3', description: 'Description 3', divisa_id: 3, price: 30.99, precio_en_dolares: 10.33, divisa_valor: 3.00, stock: 20 },
+      ]
+      sinon.stub(db, 'execute').resolves([products])
 
-  it('should log an error message and throw an error if CurrencyScraper.scrapeDollarValue fails', async () => {
-    const consoleErrorStub = sinon.stub(console, 'error')
-    const errorMessage = 'Network error'
-    const error = new Error(errorMessage)
+      const result = await Product.getAll(1, 2)
 
-    scrapeDollarValueStub.rejects(error)
+      expect(result).to.deep.equal(products)
+      expect(db.execute.calledWith(sinon.match.string, [1, 2])).to.be.true
+    })
 
-    try {
-      await ProductModel.updateDollarValue()
-    } catch (err) {
-      expect(err).to.equal(error)
-    }
+    it('should throw an error if database query fails', async () => {
+      const error = new Error('Database error')
+      sinon.stub(db, 'execute').rejects(error)
 
-    expect(scrapeDollarValueStub.calledOnce).to.be.true
-    expect(consoleErrorStub.calledWith("Error al actualizar el valor del dólar:", errorMessage)).to.be.true
-
-    consoleErrorStub.restore()
+      try {
+        await Product.getAll()
+        expect.fail('Expected an error to be thrown')
+      } catch (err) {
+        expect(err).to.equal(error)
+      }
+    })
   })
 })

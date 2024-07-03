@@ -1,22 +1,31 @@
 const Product = require('../models/productModel');
+const { isValidNumber, isValidId } = require('../utils/validatorUtils');
 
-// Función auxiliar para validar ID (esta es una implementación básica, ajusta según tus necesidades)
-function isValidId(id) {
-  return !isNaN(id) && parseInt(id) > 0;
+// Función para validar los parámetros de paginación
+function validatePaginationParams(page, limit) {
+  if (!isValidNumber(page) || !isValidNumber(limit) || page < 1 || limit < 1) {
+    const error = new Error('Parámetros de paginación inválidos');
+    error.code = 'INVALID_PAGINATION_PARAMS';
+    throw error;
+  }
+}
+
+// Función para calcular los parámetros de paginación
+function getPaginationParams(query = {}) {
+  const { page = 1, limit = 10 } = query;
+  validatePaginationParams(page, limit);
+  const offset = (page - 1) * limit;
+  return { page, limit, offset };
 }
 
 exports.getAllProducts = async (req, res) => {
   try {
-    // Implementación básica de paginación
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const offset = (page - 1) * limit;
-
+    const { page, limit, offset } = getPaginationParams(req.query);
     const products = await Product.getAll(limit, offset);
     res.json(products);
   } catch (err) {
     console.error('Error in getAllProducts:', err);
-    res.status(500).json({ error: 'Error al obtener productos' });
+    res.status(500).json({ error: 'Error al obtener productos', details: err.message });
   }
 };
 
@@ -38,10 +47,6 @@ exports.getProductById = async (req, res) => {
   }
 };
 
-// Nota: El resto de las funciones (createProduct, updateProduct, deleteProduct) 
-// seguirían un patrón similar con las mejoras aplicadas.
-
-// Ejemplo de createProduct con las mejoras:
 exports.createProduct = async (req, res) => {
   try {
     // Aquí podrías agregar validación de entrada para req.body
@@ -52,9 +57,6 @@ exports.createProduct = async (req, res) => {
     res.status(500).json({ error: 'Error al crear el producto' });
   }
 };
-
-// ... (updateProduct y deleteProduct seguirían un patrón similar)
-
 
 exports.updateProduct = async (req, res) => {
   try {

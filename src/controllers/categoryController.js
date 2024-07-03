@@ -1,21 +1,8 @@
 const Category = require('../models/categoryModel');
+const { createErrorResponse, createSuccessResponse } = require('../utils/responseUtils');
+const { logError } = require('../utils/errorUtils');
 
-// Función simple para crear respuestas de error estandarizadas
-const createErrorResponse = (message, statusCode = 500) => ({
-  error: message,
-  statusCode
-});
-
-// Función simple para crear respuestas de éxito estandarizadas
-const createSuccessResponse = (data) => ({
-  data,
-  success: true
-});
-
-// Función simple para loggear errores (puedes mejorarla según tus necesidades)
-const logError = (message, error) => {
-  console.error(`${message}:`, error);
-};
+const { validateCategory } = require('../utils/validatorUtils');
 
 exports.getAllCategories = async (req, res) => {
   try {
@@ -23,7 +10,7 @@ exports.getAllCategories = async (req, res) => {
     res.json(createSuccessResponse(categories));
   } catch (err) {
     logError('Error al obtener categorías', err);
-    res.status(500).json(createErrorResponse('Error al obtener categorías'));
+    res.status(500).json(createErrorResponse('Error al obtener categorías', 500, err));
   }
 };
 
@@ -37,22 +24,32 @@ exports.getCategoryById = async (req, res) => {
     }
   } catch (err) {
     logError('Error al obtener la categoría', err);
-    res.status(500).json(createErrorResponse('Error al obtener la categoría'));
+    res.status(500).json(createErrorResponse('Error al obtener la categoría', err));
   }
 };
 
 exports.createCategory = async (req, res) => {
   try {
+    const { error } = validateCategory(req.body);
+    if (error) {
+      return res.status(400).json(createErrorResponse(error.details[0].message, 400));
+    }
+
     const id = await Category.create(req.body);
     res.status(201).json(createSuccessResponse({ id, ...req.body }));
   } catch (err) {
     logError('Error al crear la categoría', err);
-    res.status(500).json(createErrorResponse('Error al crear la categoría'));
+    res.status(500).json(createErrorResponse('Error al crear la categoría', err));
   }
 };
 
 exports.updateCategory = async (req, res) => {
   try {
+    const { error } = validateCategory(req.body);
+    if (error) {
+      return res.status(400).json(createErrorResponse(error.details[0].message, 400));
+    }
+
     const affectedRows = await Category.update(req.params.id, req.body);
     if (affectedRows > 0) {
       res.json(createSuccessResponse({ id: req.params.id, ...req.body }));
@@ -61,7 +58,7 @@ exports.updateCategory = async (req, res) => {
     }
   } catch (err) {
     logError('Error al actualizar la categoría', err);
-    res.status(500).json(createErrorResponse('Error al actualizar la categoría'));
+    res.status(500).json(createErrorResponse('Error al actualizar la categoría', err));
   }
 };
 
@@ -75,6 +72,6 @@ exports.deleteCategory = async (req, res) => {
     }
   } catch (err) {
     logError('Error al eliminar la categoría', err);
-    res.status(500).json(createErrorResponse('Error al eliminar la categoría'));
+    res.status(500).json(createErrorResponse('Error al eliminar la categoría', err));
   }
 };

@@ -1,24 +1,27 @@
 const db = require("../config/database");
 const CurrencyScraper = require("./currencyScraper");
+const { validateId, validateObject } = require("../utils/validatorUtils");
 
 class Product {
-  static async getAll() {
+  static async getAll(limit = 100, offset = 0) {
     try {
-      // const [rows] = await db.execute('SELECT * FROM productos');
-      const [rows] = await db.execute(`
-      SELECT
-      p.id,
-      p.name,
-      p.description,
-      p.divisa_id,
-      ROUND(p.price, 2) AS price,
-      ROUND(p.price/d.valor, 2) AS precio_en_dolares,
-      ROUND(d.valor, 2) AS divisa_valor,
-      p.stock
-      FROM productos p
-      JOIN divisas d ON p.divisa_id = d.id;
-
-`);
+      const [rows] = await db.execute(
+        `
+        SELECT
+          p.id,
+          p.name,
+          p.description,
+          p.divisa_id,
+          ROUND(p.price, 2) AS price,
+          ROUND(p.price/d.valor, 2) AS precio_en_dolares,
+          ROUND(d.valor, 2) AS divisa_valor,
+          p.stock
+        FROM productos p
+        JOIN divisas d ON p.divisa_id = d.id
+        LIMIT ? OFFSET ?;
+        `,
+        [limit, offset]
+      );
       console.log("Retrieved all products");
       return rows;
     } catch (error) {
@@ -29,9 +32,7 @@ class Product {
 
   static async getById(id) {
     try {
-      if (!Number.isInteger(Number(id))) {
-        throw new Error("Invalid id: must be an integer");
-      }
+      validateId(id);
 
       const [rows] = await db.execute("SELECT * FROM productos WHERE id = ?", [
         id,
@@ -52,29 +53,37 @@ class Product {
 
   static async create(product) {
     try {
-      if (typeof product !== "object" || product === null) {
-        throw new Error("Invalid product: must be an object");
-      }
+      validateObject(product);
 
-      const [result] = await db.execute("INSERT INTO productos SET ?", [
+      const conn = await db.getConnection();
+      await conn.beginTransaction();
+
+      const [result] = await conn.execute("INSERT INTO productos SET ?", [
         product,
       ]);
+
+      // Perform additional operations within the transaction if needed
+
+      await conn.commit();
       console.log(`Created new product with id: ${result.insertId}`);
       return result.insertId;
     } catch (error) {
+      if (conn) {
+        await conn.rollback();
+      }
       console.error(`Error creating product: ${error.message}`);
       throw error;
+    } finally {
+      if (conn) {
+        conn.release();
+      }
     }
   }
 
   static async update(id, product) {
     try {
-      if (!Number.isInteger(Number(id))) {
-        throw new Error("Invalid id: must be an integer");
-      }
-      if (typeof product !== "object" || product === null) {
-        throw new Error("Invalid product: must be an object");
-      }
+      validateId(id);
+      validateObject(product);
 
       const [result] = await db.execute("UPDATE productos SET ? WHERE id = ?", [
         product,
@@ -96,9 +105,7 @@ class Product {
 
   static async delete(id) {
     try {
-      if (!Number.isInteger(Number(id))) {
-        throw new Error("Invalid id: must be an integer");
-      }
+      validateId(id);
 
       const [result] = await db.execute("DELETE FROM productos WHERE id = ?", [
         id,
