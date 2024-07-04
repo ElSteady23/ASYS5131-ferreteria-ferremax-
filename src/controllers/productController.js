@@ -20,7 +20,7 @@ function getPaginationParams(query = {}) {
 
 exports.getAllProducts = async (req, res) => {
   try {
-    const { page, limit, offset } = getPaginationParams(req.query);
+    const {limit, offset } = getPaginationParams(req.query);
     const products = await Product.getAll(limit, offset);
     res.json(products);
   } catch (err) {

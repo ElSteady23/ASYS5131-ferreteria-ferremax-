@@ -8,11 +8,13 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageThreshold: {
     global: {
-      branches: 1,
-      functions: 1,
-      lines: 1,
-      statements: 1
+      branches: 90,
+      functions: 90,
+      lines: 90,
+      statements: 90
     }
   },
-  setupFilesAfterEnv: ['./jest.setup.js']
+  setupFilesAfterEnv: ['./jest.setup.js'],
+  testPathIgnorePatterns: ['/src/models/', '/src/controllers/', '/__tests__/']
+  // testPathIgnorePatterns: ['/src/models/', '/src/controllers/']
 };

@@ -18,19 +18,20 @@ const corsOptions = {
   origin: process.env.FRONTEND_URL || process.env.DEFAULT_FRONTEND_URL,
   optionsSuccessStatus: 200
 }
-
+app.use(morgan('dev'));
 // Configurar middleware
+app.use(cors());
 configureMiddleware(app, corsOptions);
 
 // Rutas de la API
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/categories', categoryRoutes);
-app.use('/api/v1/transbank', transbankRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/transbank', transbankRoutes);
 
-// app.use((err, req, res, next) => {
-//   httpError(res, 'Error interno del servidor', err);
-// });
+app.use((err, req, res, next) => {
+  httpError(res, 'Error interno del servidor', err);
+});
 
 
 // Función para actualizar el valor del dólar

@@ -3,23 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eliminar Categoría</title>
+    <title>Operaciones con Productos</title>
 </head>
 <body>
-    <h1>Eliminar Categoría</h1>
-    <form id="deleteForm">
-        <label for="categoryId">ID de la Categoría a Eliminar:</label>
-        <input type="number" id="categoryId" required><br><br>
-        <button type="submit">Eliminar Categoría</button>
+    <h1>Operaciones con Productos</h1>
+
+    <h2>Obtener Productos</h2>
+    <button onclick="getProducts()">Obtener Productos</button>
+    <ul id="productList"></ul>
+
+    <h2>Crear Producto</h2>
+    <form id="createForm">
+        <label for="sku">SKU:</label>
+        <input type="number" id="sku" required><br><br>
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required><br><br>
+        <label for="descripcion">Descripción:</label>
+        <textarea id="descripcion"></textarea><br><br>
+        <label for="precio">Precio:</label>
+        <input type="number" id="precio" required><br><br>
+        <label for="codigo_divisa">Código de Divisa:</label>
+        <input type="text" id="codigo_divisa" required><br><br>
+        <label for="cantidad_disponible">Cantidad Disponible:</label>
+        <input type="number" id="cantidad_disponible" required><br><br>
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" required><br><br>
+        <button type="submit">Crear Producto</button>
+    </form>
+
+    <h2>Actualizar Producto</h2>
+    <form id="updateForm">
+        <label for="productIdUpdate">ID del Producto a Actualizar:</label>
+        <input type="number" id="productIdUpdate" required><br><br>
+        <label for="nombreUpdate">Nuevo Nombre:</label>
+        <input type="text" id="nombreUpdate" required><br><br>
+        <button type="submit">Actualizar Producto</button>
     </form>
 
     <script>
-        document.getElementById('deleteForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const categoryId = document.getElementById('categoryId').value;
+        function getProducts() {
+            fetch('http://localhost:3000/api/products')
+                .then(response => response.json())
+                .then(data => {
+                    const productList = document.getElementById('productList');
+                    productList.innerHTML = '';
+                    data.forEach(product => {
+                        const li = document.createElement('li');
+                        li.textContent = `${product.nombre} - SKU: ${product.sku} - Precio: ${product.precio} ${product.codigo_divisa}`;
+                        productList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
-            fetch(`http://localhost:3000/api/categories/${categoryId}`, {
-                method: 'DELETE',
+        // Crear Producto
+        document.getElementById('createForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const sku = document.getElementById('sku').value;
+            const nombre = document.getElementById('nombre').value;
+            const descripcion = document.getElementById('descripcion').value;
+            const precio = document.getElementById('precio').value;
+            const codigo_divisa = document.getElementById('codigo_divisa').value;
+            const cantidad_disponible = document.getElementById('cantidad_disponible').value;
+            const marca = document.getElementById('marca').value;
+
+            fetch('http://localhost:3000/api/products', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sku, nombre, descripcion, precio, codigo_divisa, cantidad_disponible, marca })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                this.reset();
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        });
+
+        // Actualizar Producto
+        document.getElementById('updateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = document.getElementById('productIdUpdate').value;
+            const nombre = document.getElementById('nombreUpdate').value;
+
+            fetch(`http://localhost:3000/api/products/${productId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre })
             })
             .then(response => response.json())
             .then(data => {
