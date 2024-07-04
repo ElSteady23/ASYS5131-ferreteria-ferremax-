@@ -28,9 +28,9 @@ app.use('/api/v1/products', productRoutes);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/transbank', transbankRoutes);
 
-app.use((err, req, res, next) => {
-  httpError(res, 'Error interno del servidor', err);
-});
+// app.use((err, req, res, next) => {
+//   httpError(res, 'Error interno del servidor', err);
+// });
 
 
 // Función para actualizar el valor del dólar
