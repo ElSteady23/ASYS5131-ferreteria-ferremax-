@@ -83,7 +83,6 @@ class Category {
     }
   }
 
-  // ... (otros métodos sin cambios)
 }
 
 module.exports = Category;

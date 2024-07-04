@@ -1,5 +1,5 @@
-// databaseManager.js
-// const config = require('../config/config');
+// // databaseManager.js
+// // const config = require('../config/config');
 const winston = require('winston');
 const db = require('../config/database');
 
